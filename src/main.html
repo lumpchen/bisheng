@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<body>
+
+<!-- <canvas id="myCanvas" width="600" height="600" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas> -->
+
+<script src="pagedef.js"></script>
+<script src="box.js"></script>
+<script src="frame.js"></script>
+<script src="page.js"></script>
+<script src="renderingbox.js"></script>
+<script src="stylesheet.js"></script>
+<script src="editor.js"></script>
+
+<script src="lib/matrix.js"></script>
+
+
+<script type="text/javascript" charset="utf-8">
+
+	function test_matrix() {
+		var m = new Matrix();
+		console.log(m.toString());
+		var m1 = m.clone().translate(72, 90);
+		console.log(m1.toString());
+		console.log(m1.applyToPoint(0, 0));
+		console.log(m.applyToPoint(10, 5));
+		console.log(m1.applyToPoint(0, 0));
+	};
+	// test_matrix();
+
+	function test_box() {
+		var box = new BiSheng.Box(50, 100);
+		var line = new BiSheng.Box(50, 20);
+		box.appendChild(line);
+		line = new BiSheng.Box(50, 30);
+		box.appendChild(line);
+		var remain = box.remain();
+		console.log(remain);
+	};
+	// test_box();
+
+	function test_frame() {
+		var pageDef = new BiSheng.PageDef(612, 792, {
+				left : 72,
+				top : 90,
+				right : 72,
+				bottom : 90});
+		pageDef.headerMargin = 35.4;
+		pageDef.footerMargin = 35.4;
+
+		var page = new BiSheng.Page(pageDef);
+
+		console.log(page.headerFrame);
+		console.log(page.bodyFrame);
+		console.log(page.footerFrame);
+	};
+	// test_frame();
+
+	function test_stylesheet() {
+		var stylesheet = new BiSheng.StyleSheet();
+
+		var defaultParaStyle = new stylesheet.ParagraphStyle();
+
+		console.log(BiSheng.Alignment.left);
+		
+		console.log(defaultParaStyle.alignment);
+	};
+	// test_stylesheet();
+
+
+	function test_rendering() {
+
+
+		var editor = new BiSheng.Editor();
+
+		var pageList = [];
+
+		for (var i = 0; i < 3; i++) {
+			var pageDef = new BiSheng.PageDef(612, 792, {
+					left : 72,
+					top : 90,
+					right : 72,
+					bottom : 90});
+			pageDef.headerMargin = 35.4;
+			pageDef.footerMargin = 35.4;
+
+			var page = new BiSheng.RenderingPage(pageDef);
+			pageList[i] = page;
+			console.log(page.headerFrame);
+			console.log(page.bodyFrame);
+			console.log(page.footerFrame);
+
+			var canvas = editor.createPageCanvas(pageDef.width, pageDef.height, i);
+			document.body.appendChild(editor.getDocumentElement());
+
+			// var canvas = document.getElementById("myCanvas");
+			var context = canvas.getContext('2d');
+			canvas.width = pageDef.width;
+			canvas.height = pageDef.height;
+
+
+			function getMousePos(canvas, evt) {
+	        	var rect = canvas.getBoundingClientRect();
+	        	
+	        	return {
+	          		x: evt.clientX - rect.left,
+	          		y: evt.clientY - rect.top
+	        	};
+	      	}
+			
+			canvas.addEventListener('click', function(evt) {
+				var mousePos = getMousePos(canvas, evt);			
+				var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+				console.log(message);
+
+				var box = page.locateToBox(new BiSheng.Point(mousePos.x, mousePos.y));
+				console.log(box);
+
+			}, false);
+
+			var myctx = new BiSheng.RenderContext(context);
+			page.render(myctx);	
+		}
+
+		editor.setCursor(0, pageList[0].bodyFrame.x, pageList[0].bodyFrame.y);
+
+	};
+	test_rendering();
+
+
+</script>
+
+</body>
+</html>
+
